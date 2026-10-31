@@ -1,0 +1,153 @@
+using System;
+using System.IO;
+using System.Reflection;
+using System.Text.RegularExpressions;
+using Railroader.Modding;
+
+namespace CollegeEducatedSpouts
+{
+    /// <summary>
+    /// Entry point for the game's own mod loader: Info.json lists this assembly under "assemblies", and the game
+    /// creates this class and calls OnModLoad once at start-up. It must stay public with a parameterless constructor.
+    /// </summary>
+    public sealed class ModEntryPoint : IModEntryPoint
+    {
+        public void OnModLoad(IModContext context)
+        {
+            // 0Harmony.dll ships beside this assembly. Hook the resolver before any method that uses Harmony is
+            // compiled, so it is found even if the runtime does not probe the mod folder by itself.
+            string dir = context.ModDirectory;
+            AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
+            {
+                string file = Path.Combine(dir, new AssemblyName(args.Name).Name + ".dll");
+                return File.Exists(file) ? Assembly.LoadFrom(file) : null;
+            };
+            Main.Load(context);
+        }
+
+        public void OnModUnload()
+        {
+            Main.Shutdown();
+        }
+    }
+
+    internal sealed class ModLogger
+    {
+        private readonly IModLogger _log;
+
+        internal ModLogger(IModLogger log)
+        {
+            _log = log;
+        }
+
+        public void Log(string message) => _log.Info(message);
+        public void Warning(string message) => _log.Warning(message);
+        public void Error(string message) => _log.Error(message);
+        public void LogException(Exception e) => _log.Error(e, e.Message);
+    }
+
+    internal sealed class ModInfo
+    {
+        public string Id;
+        public string Version;
+    }
+
+    /// <summary>What the mod knows about itself: log, version (from Info.json) and folder.</summary>
+    internal sealed class ModHandle
+    {
+        public ModLogger Logger;
+        public ModInfo Info;
+        public string Path;
+    }
+
+    public static class Main
+    {
+        internal static ModHandle Mod;
+        internal static Settings Settings;
+
+        /// <summary>True while the mod is running.</summary>
+        internal static bool Active;
+
+        internal static string SettingsPath => Path.Combine(Mod.Path, "Settings.xml");
+
+        private static HarmonyLib.Harmony _harmony;
+        private static UnityEngine.GameObject _hotkey;
+
+        internal static void Load(IModContext context)
+        {
+            Mod = new ModHandle
+            {
+                Logger = new ModLogger(context.Log),
+                Info = new ModInfo { Id = context.ModIdentifier, Version = ReadVersion(context.ModDirectory) },
+                Path = context.ModDirectory,
+            };
+
+            Settings = Settings.Load(SettingsPath, out string problem);
+            if (problem != null) Mod.Logger.Warning("Settings: " + problem);
+
+            _harmony = new HarmonyLib.Harmony(context.ModIdentifier);
+            Active = SelfCheck.Run(context, _harmony);
+            if (!Active) return;
+
+            try
+            {
+                _hotkey = new UnityEngine.GameObject("CollegeEducatedSpouts.Hotkey");
+                UnityEngine.Object.DontDestroyOnLoad(_hotkey);
+                _hotkey.AddComponent<SettingsHotkey>();
+            }
+            catch (Exception e)
+            {
+                Mod.Logger.Warning("Settings window hotkey could not be set up: " + e.Message);
+            }
+
+            // Water columns already built (the map normally loads after the mod, and the Configure patch covers those).
+            try
+            {
+                foreach (var builtin in UnityEngine.Object.FindObjectsByType<Game.Builtins.CarLoaderBuiltin>(UnityEngine.FindObjectsSortMode.None))
+                {
+                    SpoutSwing.Attach(builtin);
+                }
+            }
+            catch (Exception e)
+            {
+                Mod.Logger.Warning("Spouts could not be set up on existing columns: " + e.Message);
+            }
+        }
+
+        internal static void Shutdown()
+        {
+            Active = false;
+            if (_harmony != null)
+            {
+                _harmony.UnpatchAll(_harmony.Id);
+                _harmony = null;
+            }
+
+            // The spouts keep their wrapper (harmless at no turn); stop turning them.
+            foreach (var swing in UnityEngine.Object.FindObjectsByType<SpoutSwing>(UnityEngine.FindObjectsSortMode.None))
+            {
+                UnityEngine.Object.Destroy(swing);
+            }
+
+            if (_hotkey != null)
+            {
+                UnityEngine.Object.Destroy(_hotkey);
+                _hotkey = null;
+            }
+        }
+
+        private static string ReadVersion(string modDirectory)
+        {
+            try
+            {
+                string json = File.ReadAllText(Path.Combine(modDirectory, "Info.json"));
+                Match m = Regex.Match(json, "\"version\"\\s*:\\s*\"([^\"]*)\"", RegexOptions.IgnoreCase);
+                if (m.Success) return m.Groups[1].Value;
+            }
+            catch (Exception)
+            {
+            }
+            return "?";
+        }
+    }
+}
