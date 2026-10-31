@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.1
+
+- Fixed: with Auto Engineer Brake Fix 2.7.0 installed, the game reported a circular dependency and loaded neither mod. This mod no longer lists Auto Engineer Brake Fix as an optional dependency (that one links the other way). Auto Engineer Brake Fix still finds this mod by itself.
+
 ## 1.0.0
 
 First release as its own mod. The swinging spouts that were part of Auto Engineer Brake Fix 2.6.x (see its changelog for

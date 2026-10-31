@@ -2,16 +2,13 @@
   "identifier": "exp232/collegeeducatedspouts",
   "name": "College-Educated Spouts",
   "author": "Exp232",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Water columns and water towers that swing to meet the tender hatch before they lower. Works well with Auto Engineer Brake Fix, which can use it for water stops.",
   "url": "https://github.com/Exp232/CollegeEducatedSpouts",
   "scope": "optional",
   "dependencies": {
     "required": [
       "rr/game >=0.6.0"
-    ],
-    "optional": [
-      "exp232/autoengineerbrakefix >=2.7.0"
     ],
     "incompatible": [
       "exp232/autoengineerbrakefix <2.7.0"
