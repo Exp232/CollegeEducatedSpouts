@@ -24,7 +24,7 @@ without it can still join), and needs Railroader 0.6.0 or later. Do not run it w
 2.7.0, which had its own copy of this feature: the game will not load the mod in that case.
 
 ## Settings
-Ctrl+F9 opens the settings window in game. (With the optional [Mod Settings Hub](https://github.com/Exp232/ModSettingsHub) installed, the page appears in its window instead, with all your other mods' settings: Ctrl+F7 or the top-right menu button.) Everything else is in `Settings.xml` in the mod folder:
+Ctrl+F9 opens the settings window in game. (With the optional [Mod Settings Hub](https://github.com/Exp232/ModSettingsHub) installed, the same page is also in its window, with all your other mods' settings: Ctrl+F7 or the top-right menu button.) Everything else is in `Settings.xml` in the mod folder:
 
 | Setting | Default | |
 | --- | --- | --- |

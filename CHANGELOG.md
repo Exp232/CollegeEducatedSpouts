@@ -1,8 +1,12 @@
 # Changelog
 
+## 1.1.1
+
+- Mod Settings Hub: Ctrl+F9 opens this mod's own settings window again, as before 1.1.0, whether or not the hub is installed (1.1.0 sent it to the hub). The page still appears in the hub's window.
+
 ## 1.1.0
 
-- Works with the new **Mod Settings Hub** (`exp232/modsettingshub`): when it is installed, this mod's settings page appears in its window (Ctrl+F7 or the button in the top-right menu), and Ctrl+F9 opens the hub on that page. Without the hub nothing changes: Ctrl+F9 opens this mod's own window as before. The link is by reflection (`HubLink.cs`), works in either load order, and is not listed in `Info.json`.
+- Works with the new **Mod Settings Hub** (`exp232/modsettingshub`): when it is installed, this mod's settings page appears in its window (Ctrl+F7 or the button in the top-right menu), The link is by reflection (`HubLink.cs`), works in either load order, and is not listed in `Info.json`.
 
 ## 1.0.1
 
