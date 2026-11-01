@@ -7,8 +7,10 @@
 #
 # One-time setup in the repo's Settings > Secrets and variables > Actions:
 #   Secret    NEXUSMODS_API_KEY   your personal Nexus API key
-#   Variable  NEXUSMODS_FILE_ID   the Main file's File ID (Files tab > Advanced, or the edit menu on Manage files)
-#   Variable  NEXUSMODS_MOD_ID    1940
+#   Variable  NEXUSMODS_FILE_ID   7847, the File ID of any version already in the Main file's update chain
+#   Variable  NEXUSMODS_MOD_ID    1940, the number in the mod page URL
+# Both are the game-scoped numbers the website shows. The upload action talks to the v3 API, which wants
+# global IDs instead, so the "Resolve Nexus v3 IDs" step looks those up before uploading.
 name: Upload to Nexus Mods
 
 on:
@@ -50,12 +52,27 @@ jobs:
             echo "NOTES_EOF"
           } >> "$GITHUB_OUTPUT"
 
+      - name: Resolve Nexus v3 IDs
+        id: ids
+        env:
+          NEXUS_KEY: ${{ secrets.NEXUSMODS_API_KEY }}
+          FILE_VERSION_ID: ${{ vars.NEXUSMODS_FILE_ID }}
+          MOD_SCOPED_ID: ${{ vars.NEXUSMODS_MOD_ID }}
+        run: |
+          set -euo pipefail
+          api() { curl -fsS -H "apikey: $NEXUS_KEY" -H "User-Agent: CollegeEducatedSpouts-ci" "https://api.nexusmods.com/v3/$1"; }
+          FILE_ID="$(api "games/railroader/mod-file-versions/$FILE_VERSION_ID" | jq -er '.data.file.id // .file.id')"
+          MOD_ID="$(api "games/railroader/mods/$MOD_SCOPED_ID" | jq -er '.data.id // .id')"
+          echo "Mod file version $FILE_VERSION_ID belongs to v3 mod file $FILE_ID; mod $MOD_SCOPED_ID is v3 mod $MOD_ID"
+          echo "file_id=$FILE_ID" >> "$GITHUB_OUTPUT"
+          echo "mod_id=$MOD_ID" >> "$GITHUB_OUTPUT"
+
       - name: Upload to Nexus Mods
         uses: Nexus-Mods/upload-action@main
         with:
           api_key: ${{ secrets.NEXUSMODS_API_KEY }}
-          file_id: ${{ vars.NEXUSMODS_FILE_ID }}
-          mod_id: ${{ vars.NEXUSMODS_MOD_ID }}
+          file_id: ${{ steps.ids.outputs.file_id }}
+          mod_id: ${{ steps.ids.outputs.mod_id }}
           filename: ${{ steps.rel.outputs.zip }}
           display_name: College-Educated Spouts ${{ steps.rel.outputs.version }}
           version: ${{ steps.rel.outputs.version }}
