@@ -18,6 +18,7 @@ namespace CollegeEducatedSpouts
 
         internal static void Toggle()
         {
+            if (HubLink.Toggle()) return;   // the Mod Settings Hub is installed: it shows this mod's page
             var windows = WindowManager.Shared;
             if (windows == null) return;   // main menu: the window system is not up yet
             EnsureRegistered(windows);
@@ -37,39 +38,50 @@ namespace CollegeEducatedSpouts
             });
         }
 
+        // The window as the mod opens it itself: the page inside a scroll view.
         private static void Build(UIPanelBuilder builder)
         {
             try
             {
+                builder.VScrollView(BuildPage);
+            }
+            catch (Exception e)
+            {
+                Main.Mod.Logger.LogException(e);
+            }
+        }
+
+        /// <summary>The page itself, without a scroll view, so it also fits into the Mod Settings Hub window.</summary>
+        internal static void BuildPage(UIPanelBuilder page)
+        {
+            try
+            {
                 var s = Main.Settings;
-                builder.VScrollView(page =>
+                page.AddTitle("College-Educated Spouts", "CollegeEducatedSpouts " + Main.Mod.Info.Version);
+
+                page.AddSection("Swinging spouts", b =>
                 {
-                    page.AddTitle("College-Educated Spouts", "CollegeEducatedSpouts " + Main.Mod.Info.Version);
+                    b.AddFieldToggle("Swinging spouts", () => s.Enabled, v => { s.Enabled = v; Save(); });
+                    Note(b, "A water spout turns toward the tender hatch it can reach before it drops, and fills over a hatch that is longer side to side than lengthwise. The host decides; other players with the mod see the same swing. Hatch sizes per tender and limits per column: spoutswing.txt in the mod folder.");
+                    Slider(b, "Swinging column", () => s.SpoutSwingDegrees, v => s.SpoutSwingDegrees = v, 0f, 180f, 5f,
+                        v => v <= 0f ? "no turn" : "±" + v.ToString("0") + "°");
+                    Slider(b, "Drop-only spout", () => s.DropSpoutSwingDegrees, v => s.DropSpoutSwingDegrees = v, 0f, 45f, 1f,
+                        v => v <= 0f ? "no turn" : "±" + v.ToString("0") + "°");
+                    Slider(b, "Hatch width", () => s.HatchWidthFactor, v => s.HatchWidthFactor = v, 1f, 4f, 0.25f,
+                        v => "× " + v.ToString("0.00") + " the hatch radius");
+                    Slider(b, "Turn speed", () => s.SpoutSwingDegreesPerSecond, v => s.SpoutSwingDegreesPerSecond = v, 10f, 120f, 5f,
+                        v => v.ToString("0") + "°/s");
+                });
 
-                    page.AddSection("Swinging spouts", b =>
-                    {
-                        b.AddFieldToggle("Swinging spouts", () => s.Enabled, v => { s.Enabled = v; Save(); });
-                        Note(b, "A water spout turns toward the tender hatch it can reach before it drops, and fills over a hatch that is longer side to side than lengthwise. The host decides; other players with the mod see the same swing. Hatch sizes per tender and limits per column: spoutswing.txt in the mod folder.");
-                        Slider(b, "Swinging column", () => s.SpoutSwingDegrees, v => s.SpoutSwingDegrees = v, 0f, 180f, 5f,
-                            v => v <= 0f ? "no turn" : "±" + v.ToString("0") + "°");
-                        Slider(b, "Drop-only spout", () => s.DropSpoutSwingDegrees, v => s.DropSpoutSwingDegrees = v, 0f, 45f, 1f,
-                            v => v <= 0f ? "no turn" : "±" + v.ToString("0") + "°");
-                        Slider(b, "Hatch width", () => s.HatchWidthFactor, v => s.HatchWidthFactor = v, 1f, 4f, 0.25f,
-                            v => "× " + v.ToString("0.00") + " the hatch radius");
-                        Slider(b, "Turn speed", () => s.SpoutSwingDegreesPerSecond, v => s.SpoutSwingDegreesPerSecond = v, 10f, 120f, 5f,
-                            v => v.ToString("0") + "°/s");
-                    });
+                page.AddSection("", b =>
+                {
+                    b.AddButton("Reset these to defaults", ResetDefaults);
+                    Note(b, "Saved to Settings.xml as you change them.");
+                });
 
-                    page.AddSection("", b =>
-                    {
-                        b.AddButton("Reset these to defaults", ResetDefaults);
-                        Note(b, "Saved to Settings.xml as you change them.");
-                    });
-
-                    page.AddSection("Self-check", b =>
-                    {
-                        foreach (string line in SelfCheck.Report) Note(b, line);
-                    });
+                page.AddSection("Self-check", b =>
+                {
+                    foreach (string line in SelfCheck.Report) Note(b, line);
                 });
             }
             catch (Exception e)

@@ -100,6 +100,10 @@ namespace CollegeEducatedSpouts
                 Mod.Logger.Warning("Settings window hotkey could not be set up: " + e.Message);
             }
 
+            // Puts this mod's settings page into the Mod Settings Hub when that is installed (found by reflection,
+            // in either load order); without it the mod opens its own window as before.
+            HubLink.Register(context.ModIdentifier, "College-Educated Spouts", Mod.Info.Version, SettingsUi.BuildPage);
+
             // Water columns already built (the map normally loads after the mod, and the Configure patch covers those).
             try
             {
@@ -117,6 +121,7 @@ namespace CollegeEducatedSpouts
         internal static void Shutdown()
         {
             Active = false;
+            HubLink.Unregister();
             if (_harmony != null)
             {
                 _harmony.UnpatchAll(_harmony.Id);
