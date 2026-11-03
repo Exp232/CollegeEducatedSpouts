@@ -4,7 +4,7 @@ Water columns and water towers that know how to line up. When an engineer stops 
 tender hatch it can reach, and only then lowers to fill. Without the mod, the tender has to stop within a few tenths of
 a metre of one fixed spot.
 
-Works best with [Auto Engineer Brake Fix](https://github.com/Exp232/AutoEngineerBrakeFix) 2.7.0 or later, whose water stop
+Works best with [College Educated Auto Engineer](https://github.com/Exp232/CollegeEducatedAutoEngineer) (formerly Auto Engineer Brake Fix 2.7.0 or later), whose water stop
 then also counts a hatch the spout can turn to as in reach. This mod does not need it, and the two are happy apart.
 Highly recommended together.
 
@@ -20,8 +20,7 @@ Highly recommended together.
 
 ## Install
 Unzip into `Documents\Railroader\Mods` so you have `Mods\CollegeEducatedSpouts`. It is optional for multiplayer (peers
-without it can still join), and needs Railroader 0.6.0 or later. Do not run it with Auto Engineer Brake Fix older than
-2.7.0, which had its own copy of this feature: the game will not load the mod in that case.
+without it can still join), and needs Railroader 0.6.0 or later.
 
 ## Settings
 Ctrl+F9 opens the settings window in game. (With the optional [Mod Settings Hub](https://github.com/Exp232/ModSettingsHub) installed, the same page is also in its window, with all your other mods' settings: Ctrl+F7 or the top-right menu button.) Everything else is in `Settings.xml` in the mod folder:

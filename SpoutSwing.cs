@@ -714,7 +714,7 @@ namespace CollegeEducatedSpouts
     }
 
     /// <summary>
-    /// What other mods may call (Auto Engineer Brake Fix does, by reflection, when this mod is installed). Kept to plain
+    /// What other mods may call (College Educated Auto Engineer does, by reflection, when this mod is installed). Kept to plain
     /// signatures made of game types so a caller needs no reference to this assembly.
     /// </summary>
     public static class SpoutApi
