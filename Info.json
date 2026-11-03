@@ -9,9 +9,6 @@
   "dependencies": {
     "required": [
       "rr/game >=0.6.0"
-    ],
-    "incompatible": [
-      "exp232/autoengineerbrakefix <2.7.0"
     ]
   },
   "assemblies": [
