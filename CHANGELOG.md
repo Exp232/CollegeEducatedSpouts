@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.2
+
+- **A deployed spout stays where it is until the train has stood still.** Before, a column or tower turned toward the nearest tender hatch as soon as it was asked to load, and kept chasing it while the train rolled past. Now the spout holds its angle while the best tender is moving, and turns (then lowers) once that tender has been standing still for a second. Put away, it still turns back to centre.
+
 ## 1.1.1
 
 - Mod Settings Hub: Ctrl+F9 opens this mod's own settings window again, as before 1.1.0, whether or not the hub is installed (1.1.0 sent it to the hub). The page still appears in the hub's window.

@@ -11,7 +11,8 @@ Highly recommended together.
 ## What it does
 - **Water columns** (the ones that swing in from beside the track, then drop) turn up to 180° each way about the pole.
   The whole stand turns with the spout: head, lever, weights and the click handle all point where the spout does. The
-  base stays square. The spout lowers only after the turn is done.
+  base stays square. The spout lowers only after the turn is done. A spout that has been asked to load stays put while the train is still moving, and turns only once the
+  tender has stood still for about a second.
 - **Water towers** (the drop-only spout) swivel up to 15° each way, as the real ones do.
 - **Hatches** are longer side to side than lengthwise, so the fill check uses an ellipse across the car instead of the
   game's round spot. Width defaults to twice the hatch radius.

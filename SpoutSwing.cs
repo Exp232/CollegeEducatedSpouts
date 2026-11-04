@@ -50,6 +50,8 @@ namespace CollegeEducatedSpouts
         internal const string YawKey = "aebf.swingYaw";
         private const float AimEverySeconds = 0.5f;
         private const float TurnDoneDegrees = 1.5f;
+        private const float StandstillMps = 0.05f;        // a car slower than this counts as standing still
+        private const float StandstillSeconds = 1f;       // and the spout waits this long after the train has stopped before it turns
         private const float FitMarginForWaterStop = 0.9f;   // the water stop counts a hatch as in reach below this fit (1 = edge)
 
         private static readonly Dictionary<CarLoadTargetLoader, SpoutSwing> ByLoader = new Dictionary<CarLoadTargetLoader, SpoutSwing>();
@@ -89,6 +91,7 @@ namespace CollegeEducatedSpouts
         private float _maxOverride = float.NaN;
         private float _shown;             // the turn drawn on this machine (eases toward the synced one)
         private float _nextAim;
+        private float _stillSince = -1f;   // when the best car stopped (unscaled time), or -1 while it moves
         private float _lastLoggedYaw = float.NaN;
         private string _lastLoggedCar;
         private string _id;
@@ -315,11 +318,15 @@ namespace CollegeEducatedSpouts
         {
             if (!On || _sequencer == null) { SetSyncedYaw(0f); return; }
             bool wants = _kvo[_sequencer.readWantsLoadingKey].BoolValue;
-            if (!wants) { SetSyncedYaw(0f); _lastLoggedCar = null; return; }
+            if (!wants) { SetSyncedYaw(0f); _lastLoggedCar = null; _stillSince = -1f; return; }
             if (_kvo[_sequencer.readIsLoadingKey].BoolValue) return;   // keep the angle it is filling at
 
             if (TryBest(null, -1, out Car car, out CarLoadTarget hatch, out float yaw, out float fit, out Vector2 half))
             {
+                // Deployed but the train is still rolling: the spout stays as it is and turns only once the train has stood still a moment.
+                if (Mathf.Abs(car.velocity) > StandstillMps) { _stillSince = -1f; return; }
+                if (_stillSince < 0f) _stillSince = Time.unscaledTime;
+                if (Time.unscaledTime - _stillSince < StandstillSeconds) return;
                 SetSyncedYaw(yaw);
                 string carId = car.id;
                 if (carId != _lastLoggedCar || float.IsNaN(_lastLoggedYaw) || Mathf.Abs(yaw - _lastLoggedYaw) > 2f)
@@ -331,6 +338,7 @@ namespace CollegeEducatedSpouts
             }
             else
             {
+                _stillSince = -1f;
                 SetSyncedYaw(0f);
             }
         }
